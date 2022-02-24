@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  db:
+    image: bjosv/redis-cluster:6.2.0
+    restart: always
+    ports:
+      - "6380-6385:6380-6385"
+    environment:
+      IP: "0.0.0.0"
+      INITIAL_PORT: "6380"
+      TLS: "true"
+    volumes:
+      - /tmp/tls-data/ca.crt:/redis-conf/ca.crt:ro
+      - /tmp/tls-data/ca.key:/redis-conf/ca.key:ro
+      - /tmp/tls-data/redis.crt:/redis-conf/redis.crt:ro
+      - /tmp/tls-data/redis.key:/redis-conf/redis.key:ro
+
+  cadvisor:
+    image: google/cadvisor:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  go-tls-connector-1.16.6:
+    image: "bjosv/go-tls-connector:1.16.6"
+    restart: always
+    depends_on:
+      - "db"
+    environment:
+      URI: "rediss://db:6380"
+      PINGS: "250"
+    volumes:
+      - /tmp/tls-data/ca.crt:/redis-conf/ca.crt:ro
+      - /tmp/tls-data/ca.key:/redis-conf/ca.key:ro
+      - /tmp/tls-data/curl.crt:/redis-conf/curl.crt:ro
+      - /tmp/tls-data/curl.key:/redis-conf/curl.key:ro
+
+  go-tls-connector-1.16.7:
+    image: "bjosv/go-tls-connector:1.16.7"
+    restart: always
+    depends_on:
+      - "db"
+    environment:
+      URI: "rediss://db:6380"
+      PINGS: "250"
+    volumes:
+      - /tmp/tls-data/ca.crt:/redis-conf/ca.crt:ro
+      - /tmp/tls-data/ca.key:/redis-conf/ca.key:ro
+      - /tmp/tls-data/curl.crt:/redis-conf/curl.crt:ro
+      - /tmp/tls-data/curl.key:/redis-conf/curl.key:ro
