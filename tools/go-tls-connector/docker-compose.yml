@@ -33,7 +33,7 @@ services:
       - "db"
     environment:
       URI: "rediss://db:6380"
-      PINGS: "250"
+      PINGS: "10"
     volumes:
       - /tmp/tls-data/ca.crt:/redis-conf/ca.crt:ro
       - /tmp/tls-data/ca.key:/redis-conf/ca.key:ro
@@ -47,9 +47,34 @@ services:
       - "db"
     environment:
       URI: "rediss://db:6380"
-      PINGS: "250"
+      PINGS: "10"
     volumes:
       - /tmp/tls-data/ca.crt:/redis-conf/ca.crt:ro
       - /tmp/tls-data/ca.key:/redis-conf/ca.key:ro
       - /tmp/tls-data/curl.crt:/redis-conf/curl.crt:ro
       - /tmp/tls-data/curl.key:/redis-conf/curl.key:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    links:
+      - cadvisor:cadvisor
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    user: "$UID:$GID"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    links:
+      - prometheus:prometheus
