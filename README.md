@@ -9,6 +9,9 @@ go install golang.org/dl/go1.16.7@latest
 go1.16.7 download
 go1.16.7 version
 
+go install golang.org/dl/go1.18beta1@latest
+go1.18beta1 download
+
 ## Go base containers
 
 ### Docker Official Image packaging for golang
@@ -26,6 +29,10 @@ https://github.com/docker-library/docs/commit/14ed5488194a3320b9a5c5f1f09df3585e
 [`1.16.7-alpine3.14`, `1.16-alpine3.14`, `1-alpine3.14`, `alpine3.14`, `1.16.7-alpine`, `1.16-alpine`, `1-alpine`, `alpine`]
 
 
-## Build golang container
+## Build own base container
 docker build -t golang:1.16.6-alpine-own images/golang1.16.6-alpine
 docker build -t golang:1.16.7-alpine-own images/golang1.16.7-alpine
+
+cd images/golang-master
+git clone https://github.com/golang/go.git
+docker build -t golang:master --no-cache images/golang-master
