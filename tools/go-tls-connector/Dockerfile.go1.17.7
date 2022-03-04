@@ -1,0 +1,16 @@
+FROM golang:1.17.7-alpine as builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+WORKDIR /build
+COPY go.mod /build
+COPY go.sum /build
+COPY go-tls-connector.go /build
+RUN go build -ldflags '-extldflags -static' -a go-tls-connector.go
+
+FROM scratch
+COPY --from=builder /build/go-tls-connector /app/
+CMD ["/app/go-tls-connector"]
