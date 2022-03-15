@@ -2,14 +2,14 @@
 
 These instructions setup a local Kubernetes cluster and pods using the tool `minikube`.
 
-In the cluster there is pod `Prometheus` that every other minute connects to 9 Go processes
+In the cluster there is process/pod `Prometheus` that every other minute connects to 9 Go processes
 called `redis_exporter`, i.e the Go process that gives the CPU spike.
 When `redis_exporter` accepts a http connection from `Prometheus` it connects to the redis database
-via TLS to fetch metrics. This is the connection that sometimes triggers a "busy loop" in the Go runtime.
+via TLS to fetch metrics. This is the connection that uses a timer that sometimes triggers a "busy loop" in the Go runtime.
 
-<prometheus>  ---->  <redis_exporter>  --X-->  <redis>
+`[prometheus]  ---->  [redis_exporter]  --X-->  [redis]`
 
-The official redis_exporter container used in this deployment is build with Go 1.17.8
+The official `redis_exporter` container used in this deployment is built with `Go 1.17.8`
 
 ## Requirements
 - openssl  (used OpenSSL 1.1.1f)
@@ -22,14 +22,13 @@ Tested on Ubuntu 20.04 using Docker 20.10.10
 
 ### Generate TLS certificates
 
-This script will generate TLS certs to `/tmp/tls-data` needed by the deployment.
-The script is located relative to this readme-file in this git repo.
-
 `./scripts/gen-test-certs.sh`
 
-### Preparing a Kubernetes cluster
+This script will generate TLS certs to `/tmp/tls-data` needed by the deployment.
 
-This will create a local K8s cluster with the TLS-config directory mounted.
+The script is located relative to this readme-file in this git repo.
+
+### Preparing a Kubernetes cluster
 
 ```
 minikube config set memory 8192
@@ -38,37 +37,45 @@ minikube start --mount-string="/tmp/tls-data:/tls-data" --mount
 kubectl get all -A
 ```
 
-### Install prometheus on Kubernetes
+This will create a local K8s cluster with the TLS-config directory mounted to its container/VM.
 
-This installs a standard tool that fetch metrics from installed pods.
+### Install Prometheus on Kubernetes
+
+```
+kubectl create -f ./manifests/prometheus.yaml
+```
+
+This installs a standard monitoring tool that fetch metrics from installed pods.
 This will trigger a http-connect to the Go program `redis_exporter` where we have the problem.
 
-`kubectl create -f ./manifests/prometheus.yaml`
-
-### Install redis_exporter (gives the Go issue) and redis in a pod
+### Install the redis_exporter and the Redis database
 
 ```
-kubectl create -f manifests/redis-and-exporter-deployment.yaml
+kubectl create -f ./manifests/redis-and-exporter-deployment.yaml
 ```
+This deploys 9 instances of `redis_exporter` to trigger the issue a bit faster.
 
-Wait for all pod status Running using following command:
+The `redis` databases is only here to have something for `redis_exporter` to connect to.
 
-`kubectl get pods`
 
 
 ## Wait for the CPU to spike
 
-This step usually takes 5 to 30 minutes, sometimes more.
+This step usually takes 5 to 30 minutes but sometimes more.
 
 ### Check the CPU on Go processes
 
 Enter the VM/container that runs K8s:
 
-`minikube ssh`
+```
+minikube ssh
+```
 
 Watch for CPU spike using top
 
-`docker@minikube:~$ top`
+```
+docker@minikube:~$ top
+```
 
 Example:
 ```
