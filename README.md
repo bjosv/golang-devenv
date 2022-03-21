@@ -7,9 +7,11 @@ go install golang.org/dl/go1.16.6@latest
 go1.16.6 download
 go1.16.6 version
 
+# Which uses:
+# GOROOT="<HOME>/sdk/go1.16.6"
+
 go install golang.org/dl/go1.16.7@latest
 go1.16.7 download
-go1.16.7 version
 
 go install golang.org/dl/go1.18beta1@latest
 go1.18beta1 download
@@ -35,10 +37,26 @@ docker build -t golang:1.16.6-alpine-own docker/golang1.16.6-alpine
 docker build -t golang:1.16.7-alpine-own docker/golang1.16.7-alpine
 ```
 
-## Build own base container from a go repo
+## Build own base container from a go git repo
 
 ```
-cd docker/golang-master
+cd docker/golang-git
 git clone https://github.com/golang/go.git
-docker build -t golang:master --no-cache docker/golang-master
+cd ../..
+docker build -t golang:master --no-cache docker/golang-git
 ```
+
+## Install Go from source package
+
+Download, unpack and build wanted version using existing Go installation.
+This example uses a local go 1.16.6 when bootstrapping.
+```
+wget https://go.dev/dl/go1.17.8.src.tar.gz
+sudo tar xzf go1.17.8.src.tar.gz -C /usr/local/
+cd /usr/local/go/src
+sudo GOROOT_BOOTSTRAP=$HOME/sdk/go1.16.6 ./make.bash
+```
+
+## Uninstall
+
+`sudo rm -rf /usr/local/go` and remove from path
