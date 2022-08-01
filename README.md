@@ -57,6 +57,23 @@ cd /usr/local/go/src
 sudo GOROOT_BOOTSTRAP=$HOME/sdk/go1.16.6 ./make.bash
 ```
 
+## Install Go from git master
+
+```
+cd /usr/src/
+git clone https://github.com/golang/go.git
+echo "go1.XX" > VERSION
+cd src/
+sudo GOROOT_BOOTSTRAP=$HOME/sdk/go1.16.6 ./make.bash
+```
+
 ## Uninstall
 
 `sudo rm -rf /usr/local/go` and remove from path
+
+
+## Other
+
+### Go compiler and runtime meeting notes
+
+https://github.com/golang/go/issues/43930

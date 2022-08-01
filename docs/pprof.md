@@ -1,6 +1,5 @@
 # pprof - visualization and analysis of profiling data
 
-
 ## Use pprof towards K8s
 
 ```
@@ -25,4 +24,15 @@ kubectl cp <pod>:/redis_exporter redis_exporter -c redis-exporter
 
 # Visualise result
 go tool pprof -http=":8080" redis_exporter perf.data
+```
+
+## Trace
+
+```
+# Add
+import "github.com/pkg/profile"
+defer profile.Start(profile.TraceProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+
+# Inspect results
+go tool trace trace.out
 ```
